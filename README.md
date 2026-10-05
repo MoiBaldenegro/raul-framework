@@ -166,9 +166,9 @@ Esto es justo lo que hacen los frameworks por dentro: abstraen ese proceso para 
 
 ## 🛣️ Roadmap
 
-- [ ] Añadir métodos `put()`, `patch()` y `delete()`
-- [ ] Soporte para parámetros dinámicos (`/users/:id`)
-- [ ] Sistema de Middlewares
+- [ ] Creacion del enrutador ( clase Router )
+- [ ] Adaptador Http de Node JS.
+- [ ] Sistema de Middlewares.
 - [ ] Lectura del cuerpo de la petición (JSON, Form Data, URL-encoded)
 - [ ] Sistema de vistas (Templates/Blade-like)
 - [ ] Clase `Request` y `Response` para una API más "Laravel-like"
