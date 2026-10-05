@@ -1,4 +1,4 @@
-import { HttpMethod } from './HttpMethod';
+import { HttpMethod } from './HttpMethod.js';
 
 interface IRoute {
     get(path: string, handler: Function): void;

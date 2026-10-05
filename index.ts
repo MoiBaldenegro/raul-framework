@@ -1,5 +1,5 @@
-import { Router } from './router';
-import { HttpServerAdapter } from './types/HttpServerAdapter';
+import { Router } from './Router.js';
+import { HttpServerAdapter } from './types/HttpServerAdapter.js';
 
 
 function main(httpServerAdapter: HttpServerAdapter | null = null) {

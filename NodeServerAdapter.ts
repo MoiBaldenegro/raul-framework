@@ -1,5 +1,5 @@
 import { createServer } from "http";
-import { HttpServerAdapter } from "./types/HttpServerAdapter";
+import { HttpServerAdapter } from "./types/HttpServerAdapter.js";
 
 export class NodeServerAdapter implements HttpServerAdapter {
     
