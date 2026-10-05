@@ -5,7 +5,7 @@
 
 <div align="center">
 
-Un mini-framework HTTP inspirado en Laravel, escrito 100% en TypeScript. Nace con una idea muy simple: **entender cómo funciona un framework por dentro**.
+Un framework HTTP inspirado en Laravel, escrito 100% en TypeScript. Nace con una idea muy simple: **entender cómo funciona un framework por dentro**.
 
 Raúl demuestra lo esencial de cualquier framework web: el **servidor escucha**, el **router decide** y tú **respondes**.
 
