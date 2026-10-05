@@ -21,8 +21,7 @@ export class NodeServerAdapter implements HttpServerAdapter {
     }
 
     public listen(port: number = 3000, callback: () => void = (): void => {}): any {
-        const server = this.listen(port, callback);
-        server.listen(port, callback);
+        this.server.listen(port, callback);
     }
 
 }

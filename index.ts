@@ -7,10 +7,9 @@ function main(httpServerAdapter: HttpServerAdapter | null = null) {
 
     if (!httpServerAdapter) throw new Error('HttpServerAdapter is required');
 
-    httpServerAdapter.listen(3000, () => {
-        console.log('Server is running on port 3000');
+    httpServerAdapter.listen(3001, () => {
+        console.log('Server is running on port 3001');
     });
-
 
     const router = new Router();
 
@@ -24,7 +23,6 @@ function main(httpServerAdapter: HttpServerAdapter | null = null) {
 
     console.log(router);
 
-   
 }
 
 const httpServerAdapter = new NodeServerAdapter();
