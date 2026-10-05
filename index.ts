@@ -1,8 +1,17 @@
 import { Router } from './router';
+import { HttpServerAdapter } from './types/HttpServerAdapter';
 
 
-function main(){
+function main(httpServerAdapter: HttpServerAdapter | null = null) {
 
+    if (!httpServerAdapter) throw new Error('HttpServerAdapter is required');
+
+     httpServerAdapter.createServer();
+    httpServerAdapter.listen(3000, () => {
+        console.log('Server is running on port 3000');
+    }); 
+
+    httpServerAdapter.createServer();
     const router = new Router();
 
     router.get('/users', () => {
@@ -14,6 +23,8 @@ function main(){
     });
 
     console.log(router);
+
+   
 }
 
 main();
