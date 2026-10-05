@@ -1,8 +1,7 @@
  Raúl
 
 <div style="display: flex; flex-direction:row; gap: 16px; align-items:center; justify-content: center; margin-bottom: 16px;">
-  <img style="border-radius: 16px;" src="./raul-logo.webp" alt="Raúl Framework Logo" width="320" />
-  <h1 style="font-size: 96px;"> raul </h1>
+  <img style="border-radius: 16px;" src="./raul-logo.webp" alt="Raúl Framework Logo" width="720" />
 </div>
 
 <div align="center">
