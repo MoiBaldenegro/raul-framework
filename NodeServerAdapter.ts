@@ -2,19 +2,28 @@ import { createServer } from "http";
 import { HttpServerAdapter } from "./types/HttpServerAdapter.js";
 
 export class NodeServerAdapter implements HttpServerAdapter {
-    
 
-    public createServer() {
-        return createServer((req, res) => {
-            res.writeHead(200, { 'Content-Type': 'text/plain' });
+    private server: any;
+
+    constructor() {
+
+        this.server = this.createServer();
+    }
+
+    private createServer(): any {
+
+        const server = createServer((req, res) => {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'text/plain');
             res.end('Hello, World!\n');
         });
-
+        return server;
     }
 
-    public listen(port: number, callback: () => void): void {
-        const server = this.createServer();
+    public listen(port: number = 3000, callback: () => void = (): void => {}): any {
+        const server = this.listen(port, callback);
         server.listen(port, callback);
     }
+
 }
 
