@@ -1,6 +1,5 @@
- Raúl
 
-<div style="display: flex; flex-direction:row; gap: 16px; align-items:center; justify-content: center; margin-bottom: 16px;">
+<div  align="center" style="display: flex; flex-direction:row; gap: 16px; align-items:center; justify-content: center; margin-bottom: 16px;">
   <img style="border-radius: 16px;" src="./raul-logo.webp" alt="Raúl Framework Logo" width="720" />
 </div>
 
