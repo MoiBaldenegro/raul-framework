@@ -1,7 +1,6 @@
 import { RaulServerFactory } from "./RaulServerFactory.js";
 
 
-function main() {
 
     const app = RaulServerFactory.create();
 
@@ -18,7 +17,3 @@ function main() {
         console.log('Server is running on port 3002');
     });
 
-}
-
-
-main();
