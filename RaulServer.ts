@@ -1,61 +1,49 @@
-import { NodeServerAdapter } from "./NodeServerAdapter.js";
-import { Router} from "./Router.js";
+import { HttpMethod } from "./HttpMethod.js";
+import { HttpHandler, Router} from "./Router.js";
 import { HttpServerAdapter } from "./types/HttpServerAdapter.js";
 
 
+export type SupportedHttpMethods = Lowercase<keyof typeof HttpMethod>;
 
-export interface HttpRaulServer{
-    get(path: string, handler: Function): void;
-    post(path: string, handler: Function): void;
-    put(path: string, handler: Function): void;
-    delete(path: string, handler: Function): void;
-    patch(path: string, handler: Function): void;
-    options(path: string, handler: Function): void;
+export type HttpMethodMethods = {
+  [K in SupportedHttpMethods]: (path: string, handler: HttpHandler) => void;
+};
+
+export interface HttpRaulServer extends HttpMethodMethods{
     listen(port: number, callback: () => void): void;
 }
 
-export class RaulServer implements HttpRaulServer {
-    private __httpServerAdapter: HttpServerAdapter;
-    private __router: Router = new Router();
+export interface Dispatcher {
+    (method: HttpMethod, path: string, req: Request): Promise<Response>;
+}
 
-    constructor(HttpServerAdapter: HttpServerAdapter) {
-        this.__httpServerAdapter = HttpServerAdapter; 
+export interface RaulServer extends HttpMethodMethods {}
+
+export class RaulServer implements HttpRaulServer {
+
+       constructor(
+        private readonly __adapter: HttpServerAdapter,
+        private readonly __router: Router = new Router(),
+    ) {
+
+        for (const method of Object.values(HttpMethod)) {
+            const lowerMethod = method.toLowerCase() as SupportedHttpMethods;
+            this[lowerMethod] = (path: string, handler: HttpHandler) => {
+                this.__router[lowerMethod](path, handler);
+            }
+        }
     }
 
-    private dispatcher (method: string, path: string): void {
+    private async dispatcher  (method:HttpMethod, path: string, req: Request): Promise<Response> {
         const handler = this.__router.getHandler(method, path);
-        if(!handler) throw new Error(`No route found for ${method} ${path}`);
-        handler();
+        if (!handler) return new Response("Not Found", { status: 404 });
+        return handler(req);
     } 
 
-    public get(path: string, handler: Function): void {
-        this.__router.get(path, handler);
-    }
-
-    public post(path: string, handler: Function): void {
-        this.__router.post(path, handler);
-    }
-
-    public put(path: string, handler: Function): void {
-        this.__router.put(path, handler);
-    }
-
-    public delete(path: string, handler: Function): void {
-        this.__router.delete(path, handler);
-    }
-
-    public patch(path: string, handler: Function): void {
-        this.__router.patch(path, handler);
-    }
-
-    public options(path: string, handler: Function): void {
-        this.__router.options(path, handler);
-    }
-
     
-    public listen(port: number, callback: () => void): void {
-        const dispatcher = this.dispatcher.bind(this);
-        this.__httpServerAdapter.listen(port, dispatcher, callback);
+    public async listen(port: number, callback: () => void): Promise<void> {
+        const dispatcher : Dispatcher = this.dispatcher.bind(this);
+        this.__adapter.listen(port, dispatcher, callback);
     }
 
 } 
