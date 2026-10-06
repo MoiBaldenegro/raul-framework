@@ -13,31 +13,57 @@ Raúl demuestra lo esencial de cualquier framework web: el **servidor escucha**,
 
 ## 🚀 ¿Qué es Raúl?
 
-Raúl es un framework web minimalista para Node.js. Su núcleo es un enrutador súper simple que te permite registrar rutas con métodos HTTP (`GET`, `POST`, ...) y ejecutar sus controladores cuando llega una petición.
+Raúl es un framework web minimalista para Node.js. Su núcleo es un enrutador que te permite registrar rutas con métodos HTTP (`GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `OPTIONS`) y ejecutar sus controladores cuando llega una petición.
 
 Está pensado para aprender, experimentar y construir sobre él poco a poco, al estilo de cómo Laravel nos da esa comodidad para organizar rutas.
 
 ## ✨ Características
 
-- **Enrutado simple y directo** – Registra rutas por método HTTP + path.
-- **Soporte para GET y POST** – Extensible fácilmente a `PUT`, `PATCH`, `DELETE`, etc.
-- **Respuestas HTTP controladas** – Define status, headers y cuerpo de respuesta a tu gusto.
+- **API tipo Laravel** – Crea la app con `RaulServerFactory.create()` y registra rutas con `app.get()`, `app.post()`, etc.
+- **Enrutado por método HTTP + path** – Cada método tiene su propio mapa de rutas (`GET /users` ≠ `POST /users`).
+- **Todos los métodos HTTP** – `GET`, `POST`, `PUT`, `DELETE`, `PATCH` y `OPTIONS`.
+- **Arquitectura por adaptadores** – El servidor HTTP se abstrae detrás de la interfaz `HttpServerAdapter` (por defecto `NodeServerAdapter`).
 - **Servidor nativo de Node.js** – Usa `http.createServer`, sin dependencias externas.
-- **100% TypeScript** – Con tipados de `IncomingMessage` y `ServerResponse` para mayor seguridad.
+- **100% TypeScript** – Interfaces `HttpRaulServer`, `IRouter` y `HttpServerAdapter` para mayor seguridad.
 - **Ligero y educativo** – Perfecto para entender cómo funcionan los frameworks por dentro.
 - **Inspirado en Laravel** – Misma idea de definir rutas de forma limpia y declarativa.
 
 ## 📂 Estructura del proyecto
 
 ```text
-laravel-typescript-clone/
-├── raul-logo.webp     # Logo del framework Raúl
-├── index.ts           # Punto de entrada. Crea y levanta el servidor HTTP
-├── router.ts          # Núcleo del framework (Clase Router)
-├── README.md          # Documentación de Raúl
-├── instrucciones.md   # Guía paso a paso para entender la implementación
-└── package.json       # Configuración y dependencias del proyecto
+raul-framework/
+├── raul-logo.webp            # Logo del framework Raúl
+├── index.ts                  # Punto de entrada. Crea la app, registra rutas y levanta el servidor
+├── RaulServerFactory.ts      # Factory: crea instancias de RaulServer con su adaptador
+├── RaulServer.ts             # API pública (get/post/put/...) y dispatcher de rutas
+├── Router.ts                 # Núcleo del enrutado (IRouter / Router)
+├── HttpMethod.ts             # Enum con los métodos HTTP soportados
+├── NodeServerAdapter.ts      # Adaptador sobre http.createServer de Node.js
+├── types/
+│   └── HttpServerAdapter.ts  # Interfaz del adaptador de servidor HTTP
+├── README.md                 # Documentación de Raúl
+├── instrucciones.md          # Guía paso a paso para entender la implementación
+└── package.json              # Configuración y scripts del proyecto
 ```
+
+## 🏗️ Arquitectura
+
+El flujo de una petición es el siguiente:
+
+```text
+index.ts
+   └─ RaulServerFactory.create()        → new RaulServer(new NodeServerAdapter())
+         ├─ app.get()/post()/...        → Router registra method + path → handler
+         └─ app.listen(port, cb)        → HttpServerAdapter.listen(port, dispatcher)
+               └─ NodeServerAdapter     → http.createServer(req, res)
+                     └─ dispatcher(method, path)
+                           └─ Router.getHandler(method, path) → ejecuta el handler
+```
+
+- **`RaulServerFactory`** – Punto de entrada. Permite inyectar un adaptador distinto con `RaulServerFactory.create({ adapter })`.
+- **`RaulServer`** – Expone la API pública (`get`, `post`, `put`, `delete`, `patch`, `options`, `listen`) y delega el enrutado al `Router`.
+- **`Router`** – Guarda los handlers en un `Map` anidado `method → path → handler` y los busca con `getHandler(method, path)`.
+- **`HttpServerAdapter`** – Interfaz que desacopla el framework del servidor HTTP subyacente.
 
 ## ⚡ Instalación
 
@@ -45,116 +71,96 @@ Clona el proyecto y entra a la carpeta:
 
 ```bash
 git clone <repo-url>
-cd laravel-typescript-clone
+cd raul-framework
 ```
 
 Instala las dependencias:
 
 ```bash
-npm install
+pnpm install
 ```
 
 ## 🧪 Uso rápido
 
-### 1. Registrar rutas
-
-Con Raúl es tan simple como definirlas con `get()` o `post()`:
+### 1. Crear la app y registrar rutas
 
 ```ts
-import { createServer } from 'http';
-import { Router } from './router';
+import { RaulServerFactory } from './RaulServerFactory.js';
 
-const router = new Router();
+const app = RaulServerFactory.create();
 
-router.get('/', (_req, res) => {
-  res.writeHead(200, { 'Content-Type': 'text/html' });
-  res.end('<h1>¡Bienvenido a Raúl!</h1>');
+app.get('/users', () => {
+  console.log('GET /users route handler');
 });
 
-router.get('/users', (_req, res) => {
-  res.writeHead(200, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({ users: [] }));
+app.post('/users', () => {
+  console.log('POST /users route handler');
 });
 
-router.post('/users', (_req, res) => {
-  res.writeHead(201, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({ message: 'Usuario creado correctamente' }));
-});
+app.put('/users', () => { /* ... */ });
+app.delete('/users', () => { /* ... */ });
+app.patch('/users', () => { /* ... */ });
+app.options('/users', () => { /* ... */ });
 ```
 
 ### 2. Levantar el servidor
 
-Raúl te deja controlar el servidor HTTP como tú quieras. Solo pásale las peticiones al router:
+```ts
+app.listen(3002, () => {
+  console.log('Server is running on port 3002');
+});
+```
+
+### Usar un adaptador personalizado
 
 ```ts
-const server = createServer((req, res) => {
-  router.handle(req.method || 'GET', req.url || '/', req, res);
-});
+import { RaulServerFactory } from './RaulServerFactory.js';
+import { MyCustomAdapter } from './MyCustomAdapter.js';
 
-server.listen(8000, () => {
-  console.log('🔥 Raúl está corriendo en http://localhost:8000');
-});
+const app = RaulServerFactory.create({ adapter: new MyCustomAdapter() });
 ```
 
 ## ▶️ Cómo ejecutar el proyecto
 
-Para desarrollo, lo más rápido es con [`tsx`](https://github.com/esbuild-kit/tsx):
+Compila y ejecuta en un solo paso:
 
 ```bash
-npx tsx index.ts
+pnpm raul:dev
 ```
 
-Para producción, compílalo con `tsc` y ejecútalo con Node:
+Solo compilar con `tsc`:
 
 ```bash
-npx tsc
-node dist/index.js
+pnpm build
 ```
 
-## 🧪 Probarlo
-
-### En el navegador
-
-Abre [http://localhost:8000/](http://localhost:8000/) y verás el mensaje de bienvenida.
-
-Abre [http://localhost:8000/users](http://localhost:8000/users) y recibirás un JSON.
-
-### Con cURL
-
-**GET /**
+Compilar en modo watch (recompila al guardar):
 
 ```bash
-curl http://localhost:8000/
+pnpm dev
 ```
 
-**GET /users**
-
-```bash
-curl http://localhost:8000/users
-```
-
-**POST /users**
-
-```bash
-curl -X POST http://localhost:8000/users
-```
-
-Cualquier ruta que no exista devolverá `Not Found` con estado `404`.
+El servidor queda disponible en `http://localhost:3002`.
 
 ## 📚 API de Raúl
 
-### `router.get(path: string, handler)`
-Registra una ruta para el método **GET**.
+### `RaulServerFactory.create(options?)`
 
-### `router.post(path: string, handler)`
-Registra una ruta para el método **POST**.
+Crea una instancia de `RaulServer`. Acepta `{ adapter?: HttpServerAdapter }`; si no se pasa, usa `NodeServerAdapter`.
 
-### `router.handle(method: string, url: string, req: IncomingMessage, res: ServerResponse)`
-Procesa una petición HTTP entrante.
+### `app.get(path, handler)` / `app.post(path, handler)`
+### `app.put(path, handler)` / `app.delete(path, handler)`
+### `app.patch(path, handler)` / `app.options(path, handler)`
 
-- **Limpia la URL**: Elimina query params (`?page=1`) para hacer match exacto con la ruta registrada.
-- **Busca el handler**: Usa la clave `METHOD:path` para encontrarlo.
-- **Ejecuta o responde 404**: Si existe lo ejecuta, si no, responde con `404 Not Found`.
+Registran una ruta para su método HTTP en el `Router`.
+
+### `app.listen(port, callback)`
+
+Arranca el servidor HTTP a través del adaptador, pasándole el dispatcher interno.
+
+### `Router.getHandler(method, path)`
+
+Devuelve el handler registrado para ese método y path, o `undefined` si no existe.
 
 ## 🧠 Filosofía
 
@@ -162,14 +168,19 @@ Procesa una petición HTTP entrante.
 
 La gran diferencia con PHP + `php -S` es que **Node no trae un servidor HTTP por defecto**. Ahí está la esencia de Raúl: **tú creas el servidor, tú decides cómo responder**.
 
-Esto es justo lo que hacen los frameworks por dentro: abstraen ese proceso para que tú solo te centres en escribir rutas y lógica de negocio.
+Por eso Raúl separa tres responsabilidades, igual que los frameworks grandes:
+
+- **`RaulServer`** = la API con la que el usuario trabaja.
+- **`Router`** = quien decide qué handler ejecutar.
+- **`HttpServerAdapter`** = quien realmente habla con Node (o con cualquier otro runtime).
 
 ## 🛣️ Roadmap
 
-- [ ] Creacion del enrutador ( clase Router )
-- [ ] Adaptador Http de Node JS.
-- [ ] Sistema de Middlewares.
+- [ ] Pasar `req`/`res` a los handlers y devolver respuestas reales (status, headers, cuerpo)
+- [ ] Soporte para parámetros dinámicos (`/users/:id`)
+- [ ] Sistema de Middlewares
 - [ ] Lectura del cuerpo de la petición (JSON, Form Data, URL-encoded)
+- [ ] Respuesta 404 automática para rutas no registradas
 - [ ] Sistema de vistas (Templates/Blade-like)
 - [ ] Clase `Request` y `Response` para una API más "Laravel-like"
 

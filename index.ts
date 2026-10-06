@@ -1,30 +1,26 @@
-import { NodeServerAdapter } from './NodeServerAdapter.js';
-import { Router } from './Router.js';
-import { HttpServerAdapter } from './types/HttpServerAdapter.js';
+import { RaulServerFactory } from "./RaulServerFactory.js";
 
 
-function main(httpServerAdapter: HttpServerAdapter | null = null) {
+function main() {
 
-    if (!httpServerAdapter) throw new Error('HttpServerAdapter is required');
 
-    httpServerAdapter.listen(3001, () => {
-        console.log('Server is running on port 3001');
-    });
 
-    const router = new Router();
+    const app = RaulServerFactory.create();
 
-    router.get('/users', () => {
+    app.get('/users', () => {
         console.log('GET /users route handler');
     });
 
-    router.post('/users', () => {
+    app.post('/users', () => {
         console.log('POST /users route handler');
     });
 
-    console.log(router);
+
+    app.listen(3002, () => {
+        console.log('Server is running on port 3002');
+    });
 
 }
 
-const httpServerAdapter = new NodeServerAdapter();
 
-main(httpServerAdapter);
+main();

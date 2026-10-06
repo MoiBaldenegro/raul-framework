@@ -1,15 +1,16 @@
 import { HttpMethod } from './HttpMethod.js';
 
-interface IRoute {
+export interface IRouter {
     get(path: string, handler: Function): void;
     post(path: string, handler: Function): void;
     put(path: string, handler: Function): void;
     delete(path: string, handler: Function): void;
     patch(path: string, handler: Function): void;
     options(path: string, handler: Function): void;
+    getHandler(method: string, path: string): Function | undefined;
 }
 
-export class Router implements IRoute {
+export class Router implements IRouter {
 
     private routes: Map<string, Map<string, Function>>;
 
@@ -45,4 +46,12 @@ export class Router implements IRoute {
     public options(path: string, handler: Function): void {
         this.routes.get(HttpMethod.OPTIONS.toLowerCase())?.set(path, handler);
     }
+
+    public getHandler(method: string, path: string): Function | undefined {
+        const routes = this.routes.get(method.toLowerCase());
+        if(!routes) throw new Error(`No route found for ${method} ${path}`);
+        const handler = routes.get(path);
+        return handler;
+    }
+
 }
