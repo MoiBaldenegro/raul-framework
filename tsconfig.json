@@ -16,6 +16,6 @@
     
     "types": ["node"]
   },
-  "include": ["src/**/*", "*.ts"],
+  "include": ["src/**/*", "*.ts", "exception/HttpDomainException.ts", "exception/InternalServerException.ts"],
   "exclude": ["node_modules", "dist"]
 }
